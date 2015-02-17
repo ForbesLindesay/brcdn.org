@@ -1,0 +1,146 @@
+@import (npm) "twbs";
+@import "variables.less";
+@import "bootswatch.less";
+@import "github.less";
+@import "gittip.less";
+
+body { height: 100%; margin: 0; }
+
+/* Landing page */
+.title {
+  position: relative; text-align: center; margin-top: 1em; margin-bottom: 1em;
+}
+h1 { font-size: 80px; font-weight: bold; letter-spacing: -1px; line-height: 1; text-shadow: 0 1px 3px rgba(0,0,0,.4), 0 0 30px rgba(0,0,0,.075); }
+
+.jumbotron {
+  background: none;
+}
+
+.ribbon { position: absolute; top: 0; right: 0; border: 0; z-index: 2000; }
+
+
+/* Responsive */
+@media (max-width: 700px) {
+  h1 { font-size: 60px; }
+}
+@media (max-width: 400px) {
+  h1 { font-size: 40px; }
+  h2 { font-size: 30px; }
+}
+
+/* Sticky footer styles */
+html, body { height: 100%; /* The html and body elements cannot have any padding or margin. */ }
+
+/* Wrapper for page content to push down footer */
+#wrap {
+  min-height: 100%; height: auto !important; height: 100%;
+  /* Negative indent footer by it's height */
+  margin: 0 auto -130px;
+}
+
+/* Set the fixed height of the footer here */
+#push, #footer-wrapper { height: 130px; }
+#footer-wrapper { background-color: #f5f5f5; }
+
+footer { padding: 30px 0; border-top: 1px solid #e5e5e5; background-color: #f5f5f5; }
+
+footer .right { float: right; }
+
+footer p { margin-bottom: 0; color: #777; }
+
+/* Lastly, apply responsive CSS fixes as necessary */
+@media (max-width: 767px) {
+  #push, #footer-wrapper { height: 240px; }
+
+  footer .right { float: inherit; text-align: center; margin-bottom: 20px; }
+}
+
+a.jepso, a.jepso:hover, a.jepso:active {
+  color: #BF0080;
+}
+
+pre {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+pre code {
+  white-space: pre;
+  word-break: normal;
+  word-wrap: normal;
+  font-size: 1.6em;
+  font-smooth:always;
+  -webkit-font-smoothing: antialiased;
+  font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  color: black;
+}
+pre {
+  background: white;
+  box-shadow: 0px 0px 6px rgba(0,0,0,0.3);
+  border-radius: 0;
+}
+@media (max-width: 700px) {
+  pre {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+  .container > pre, .container > .small-code > pre {
+    margin-left: -15px;
+    margin-right: -15px;
+    padding-left: 1px;
+    padding-right: 1px;
+  }
+}
+.small-code pre code {
+  font-size: 1.2em;
+}
+.no-link, .no-link:hover {
+  text-decoration: none;
+}
+
+@media (max-width: @screen-md-max) {
+  pre code {
+    font-size: 1.2em;
+  }
+  .small-code pre code {
+    font-size: 1em;
+  }
+}
+@media (max-width: @screen-sm-max) {
+  pre code {
+    font-size: 1em;
+  }
+}
+@media (max-width: @screen-xs-max) {
+  .small-code pre code {
+    font-size: 0.8em;
+  }
+  pre code {
+    font-size: 0.8em;
+  }
+}
+
+@media (max-width: 550px) {
+  .specification {
+    display: none;
+  }
+}
+
+@media (max-width: 440px) {
+  ul.navbar-nav li a {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+@media (max-width: 400px) {
+  ul.navbar-nav li a {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+@media (max-width: 360px) {
+  // do something else here
+  ul.navbar-nav li a {
+    font-size: 0.8em;
+  }
+}

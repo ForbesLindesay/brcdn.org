@@ -1,0 +1,11 @@
+extends ./layout.jade
+
+block content
+  .container
+    .title
+      h1= name
+      p: small: a(href="?module=" + name + "&version=latest") Latest Version
+    ul
+      each version in versions.reverse()
+        li
+          a(href="?module=" + name + "&version=" + version)= version

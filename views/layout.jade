@@ -1,0 +1,18 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf8')
+    title Browserify CDN
+    link(href=staticFiles + '/style/bundle.css', rel='stylesheet')
+    meta(name="viewport" content="width=device-width, minimal-ui")
+  body
+    #wrap
+      block content
+        - throw new Error('Every page must have some content.')
+      #push
+    #footer-wrapper
+      footer
+        .container
+          p
+            | Developed by&nbsp;
+            a.jepso(href='http://www.forbeslindesay.co.uk') @ForbesLindesay

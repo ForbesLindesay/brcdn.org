@@ -1,0 +1,79 @@
+extends ./layout.jade
+
+block content
+  .container
+    .title
+      h1 Browserify CDN
+      small by Forbes Lindesay
+    h2 Quick start
+
+    form.form-inline
+      .form-group
+        label Module name
+        = ' '
+        input.form-control(value='throat' name='module')
+      = ' '
+      .form-group
+        label Version
+        = ' '
+        input.form-control(value='latest' name='version')
+      = ' '
+      button.btn.btn-primary View Available Downloads
+
+    h2 Comparison to #[a(href="https://wzrd.in/") wzrd.in)
+
+    p.
+      There is another browserify CDN available at wzrd.in that pre-dates this version.
+      There are a number of differences though:
+
+    ul
+      li BrowserifyCDN uses a docker image to isolate each build, wzrd.in just trusts the download from npm to not contain malware.
+      li BrowserifyCDN uses Amazon S3 to serve the compiled bundles, wzrd.in uses an in-process level-db database.  If the wzrd.in server goes offline, your bundles will no longer be available.
+      li BrowserifyCDN supports minifying your bundles via UglifyJS, making it suitable for production applications.  wzrd.in does not offer this feature.
+      li BrowserifyCDN supports all browserify options, and can also be used to request non-JavaScript files from the npm package via the #[code ?raw=true] option.  wzrd.in only supports browserify bundles with the #[code debug] and #[code standalone] options.  It does not support overriding the standalone names.
+      li wzrd.in supports creating bundles that expose multiple modules via a POST endpoint.  BrowserifyCDN does not yet offer this feature.
+
+    h2 How it works
+
+    p.
+      When you request a url like
+      #[a(href="/throat/2.0.2/index.js?uglify=true")= "https://www.brcdn.org/throat/2.0.2?uglify=true"], the following steps are performed:
+    ol
+      li A docker container is started to keep this build issolated from the rest of the system.
+      li The "throat" module is installed at v2.0.2 via npm
+      li The "throat" module is bundled using browserify with the throat module exposed as "throat"
+      li The browserified bundle is minified using uglify with the default settings
+      li The resulting JavaScript file is hashed using sha1
+      li The JavaScript is then uploaded to Amazon S3 with a filename of "{sha1-hash}.js"
+      li You are then redirected to https://brcdn.org/{sha1-hash}.js where the bundle is served.  #[strong N.B.] this is the url you should put in your #[code= '<script>'] tag in your production application
+
+    p.
+      The advantage of serving it  lets you use the rock solid S3 hosting for the actual production traffic, meaning you will not be affected if building a complex bundle uses up all this site's CPU power.
+
+    h2 Passing Extra Options
+
+    p.
+      Any options you pass in the querystring are automatically passed along to browserify.  For example, if you want to build a really old version of uglify-js, it won't work on browserify.  We can fix this though, by adding our own custom transform:
+
+    p: a(href="/uglify-js/2.2.5?transform=uglify-to-browserify") https://www.brcdn.org/uglify-js/2.2.5?transform=uglify-to-browserify
+
+    p.
+      Not only does brcdn pass through the transform option, it also installs the requested transform for you.
+
+    p.
+      You can pass options to uglify just as easilly as you can pass them to browserify.  e.g. to beautify your code, you could request something like:
+
+    p: a(href="/throat/2.0.2?uglify[output][beautify]=true")  https://www.brcdn.org/throat/2.0.2?uglify[output][beautify]=true
+
+    p.
+      If you want to disable browserify entirely (e.g. for css assets) you can pass the #[code raw=true] option.  e.g.
+
+    p: a(href="/promise/6.1.0/polyfill-done.js?raw=true")  https://www.brcdn.org/promise/6.1.0/polyfill-done.js?raw=true
+
+    p P.S. all the urls accept semver versions as an alternative to explicit version numbers, so if you're writing a blog post about a library you can link to the latest version like:
+
+    p: a(href="?module=jade&version=latest") https://www.brcdn.org/?module=jade&version=latest
+
+    p or even link directly to a download of the latest compatible version using semver
+
+    p: a(href="/jade/^1.0.0?standalone=jade") https://www.brcdn.org/jade/^1.0.0?standalone=jade

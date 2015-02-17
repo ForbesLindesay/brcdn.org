@@ -1,0 +1,41 @@
+extends ./layout.jade
+
+block content
+  .container
+    .title
+      h1= pkg.name + '@' + pkg.version
+      p: small= pkg.description
+      p: small: a(href="?module=" + pkg.name + "&version=list") Other Versions
+    .panel.panel-primary
+      .panel-heading
+        h2.panel-title Downloads
+      .panel-body
+        mixin bundle(name, url, description)
+          p
+            span.pull-right.hidden-xs
+
+              a.btn.btn-primary.btn-sm(href=url) Download
+              = ' '
+              button.btn.btn-primary.btn-sm(href=url) Copy HTML
+              = ' '
+              button.btn.btn-primary.btn-sm(href=url) Copy Jade
+            strong= name + ':'
+            = ' ' + description
+          .clearfix
+          pre
+            code
+              | <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"#{url}"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        - var has = function (n) { return function (s) { return !!s[n]; }; };
+        if specs.some(has('browserify'))
+          h3 Browserify
+          each spec in specs.filter(has('browserify'))
+            +bundle(spec.name, spec.browserify, spec.description)
+        if specs.some(has('standalone'))
+          h3 Standalone
+          each spec in specs.filter(has('standalone'))
+            +bundle(spec.name, spec.standalone, spec.description)
+        if specs.some(has('other'))
+          h3 Other
+          each spec in specs.filter(has('other'))
+            +bundle(spec.name, spec.other, spec.description)
+    != readme

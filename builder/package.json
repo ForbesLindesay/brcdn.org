@@ -1,0 +1,19 @@
+{
+  "name": "builder",
+  "version": "0.0.0",
+  "description": "A docker app to install and browserify a module",
+  "keywords": [],
+  "dependencies": {
+    "browserify": "^8.1.3",
+    "concat-stream": "^1.4.7",
+    "uglify-js": "^2.4.16"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ForbesLindesay/builder.git"
+  },
+  "author": "ForbesLindesay",
+  "license": "MIT"
+}
