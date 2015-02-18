@@ -16,9 +16,15 @@ block content
 
               a.btn.btn-primary.btn-sm(href=url) Download
               = ' '
-              button.btn.btn-primary.btn-sm(href=url) Copy HTML
+              button.btn.btn-primary.btn-sm(
+                href=url
+                data-clipboard-text='<script src="' + url + '"></script>'
+              ) Copy HTML
               = ' '
-              button.btn.btn-primary.btn-sm(href=url) Copy Jade
+              button.btn.btn-primary.btn-sm(
+                href=url
+                data-clipboard-text='script(src="' + url + '")'
+              ) Copy Jade
             strong= name + ':'
             = ' ' + description
           .clearfix
@@ -39,3 +45,23 @@ block content
           each spec in specs.filter(has('other'))
             +bundle(spec.name, spec.other, spec.description)
     != readme
+
+block scripts
+  script(src="https://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js")
+  script.
+    ZeroClipboard.config( { swfPath: "//cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.swf" } );
+    var elements = [].slice.call(document.querySelectorAll('[data-clipboard-text]'));
+    var client = new ZeroClipboard(elements);
+    client.on('ready', function (event) {
+      elements.forEach(function (el) {
+        el.addEventListener('click', function (e) {
+        e.preventDefault();
+        }, false);
+      });
+      client.on('aftercopy', function (e) {
+        e.target.setAttribute('class', 'btn btn-sm btn-success');
+        setTimeout(function () {
+            e.target.setAttribute('class', 'btn btn-sm btn-primary');
+        }, 200);
+      });
+    });
