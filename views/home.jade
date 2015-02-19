@@ -19,6 +19,10 @@ block content
         input.form-control(value='latest' name='version')
       = ' '
       button.btn.btn-primary View Available Downloads
+      .alert
+        | #[strong Warning] if you choose a module that happens
+        | to not be in the cache, it may take up to a minute to
+        | compile.  Please be patient.
 
     h2 Comparison to #[a(href="https://wzrd.in/") wzrd.in)
 

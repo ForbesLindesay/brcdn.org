@@ -8,6 +8,7 @@ var less = require('less-file');
 var MarkdownIt = require('markdown-it');
 var hljs = require('highlight.js');
 var sanitizeHtml = require('sanitize-html');
+var jade = require('jade');
 var stats = require('./lib/stats');
 var cache = require('./lib/cache');
 var getVersions = require('./lib/get-versions');
@@ -145,25 +146,38 @@ function sanatize(str) {
 }
 
 var app = express();
-app.set('views', __dirname + '/views');
 
 
 var staticFiles = app.locals.staticFiles = '/static/' + require('./package.json').version;
-app.use(staticFiles + '/style', less('./style/style.less'));
+app.use(staticFiles + '/style', less('./style/style.less', {
+  cache: true,
+  minify: true,
+  gzip: true,
+  debug: false
+}));
+
+var views = {
+  'home': jade.renderFile(__dirname + '/views/home.jade', {
+    staticFiles: staticFiles
+  }),
+  'module': jade.compileFile(__dirname + '/views/module.jade'),
+  'module-versions': jade.compileFile(__dirname + '/views/module-versions.jade')
+};
 
 app.get('/', function (req, res, next) {
   if (req.query.module) return next();
-  res.render('home.jade');
+  res.send(views['home']);
 });
 app.get('/', function (req, res, next) {
   var name = req.query.module;
   var specifier = req.query.version;
   if (specifier !== 'list') return next();
   getVersions(name).done(function (versions) {
-    res.render('module-versions.jade', {
+    res.send(views['module-versions']({
+      staticFiles: staticFiles,
       name: name,
       versions: versions
-    });
+    }));
   });
 });
 app.get('/', function (req, res, next) {
@@ -223,11 +237,12 @@ app.get('/', function (req, res, next) {
         });
       }
       return Promise.all(specs.map(resolveUrls)).then(function (specs) {
-        res.render('module.jade', {
+        res.send(views['module']({
+          staticFiles: staticFiles,
           pkg: results[0],
           specs: specs,
           readme: sanatize(md.render(results[1]))
-        });
+        }));
       });
     });
   }).done(null, next);
@@ -318,10 +333,18 @@ app.get('/status', function (req, res, next) {
           color = 'red';
           fail = true;
         }
+        var duration = Date.now() - start;
+        var durationColor = 'black';
+        if (duration > 1000) {
+          durationColor = 'orange';
+        }
+        if (duration > 30000) {
+          durationColor = 'red';
+        }
         return acc +
           '<li><strong>' + url +
           '</strong> <span style="color: ' + color +'">' +
-          res.statusCode + '</span> <i>(' + ms(Date.now() - start) +
+          res.statusCode + '</span> <i style="color: ' + durationColor + '">(' + ms(duration) +
           ')</i></li>';
       });
     });

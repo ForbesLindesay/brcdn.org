@@ -5,15 +5,23 @@ var path = require('path');
 var spawn = require('child_process').spawnSync;
 var concat = require('concat-stream');
 var browserify = require('browserify');
-var uglify = require('uglify-js');
 
 function respond(data) {
   process.stdout.write(JSON.stringify(data), function() {
     process.exit(0);
   });
 }
+function timer() {
+  var start = Date.now();
+  return function time(name) {
+    console.log(name + ': ' + (Date.now() - start));
+    start = Date.now();
+  }
+}
+var time = timer();
 process.stdin.pipe(concat(function (stdin) {
   var req = JSON.parse(stdin.toString());
+  time('read options');
   var res = spawn('npm', ['install', req.module + '@' + req.version], {
     cwd: __dirname
   });
@@ -22,9 +30,14 @@ process.stdin.pipe(concat(function (stdin) {
     process.exit(res.status);
     return;
   }
+  time('install module');
+  var inputs = [];
+  var bundles = [];
+
   Promise.all(req.bundles.map(function (options) {
     return buildBundle(req, options);
   })).then(function (bundles) {
+    time('build bundles');
     respond(bundles);
   }).then(null, function (err) {
     setTimeout(function () {
@@ -34,20 +47,13 @@ process.stdin.pipe(concat(function (stdin) {
 }));
 
 function buildBundle(req, options) {
+  var time = timer();
   return new Promise(function (resolve, reject) {
     if (options.raw) {
       fs.readFile(path.resolve(__dirname + '/node_modules/' + req.module + '/', options.entries[0]), 'utf8', function (err, bundle) {
+        time('read file');
         if (err) {
           return reject(err);
-        }
-        if (options.uglify) {
-          if (typeof options.uglify !== 'object') {
-            options.uglify = {};
-          }
-          options.uglify.fromString = true;
-          try {
-            bundle = uglify.minify(bundle, options.uglify).code;
-          } catch (ex) {}
         }
         resolve(bundle);
       });
@@ -67,6 +73,7 @@ function buildBundle(req, options) {
         process.stderr.write(res.stderr);
         process.exit(res.status);
       }
+      time('install transforms');
     }
     var entries = options.entries;
     options.entries = [];
@@ -87,21 +94,13 @@ function buildBundle(req, options) {
         bundle.require(entry, ropts);
       });
     }
+    time('prepare bundle');
     bundle.bundle(function (err, bundle) {
+      time('compile bundle' + (options.standalone ? ' standalone' : ''));
       if (err) {
         return reject(err);
       }
-      bundle = bundle.toString('utf8');
-      if (options.uglify) {
-        if (typeof options.uglify !== 'object') {
-          options.uglify = {};
-        }
-        options.uglify.fromString = true;
-        try {
-          bundle = uglify.minify(bundle, options.uglify).code;
-        } catch (ex) {}
-      }
-      resolve(bundle);
+      resolve(bundle.toString('utf8'));
     });
   });
 }

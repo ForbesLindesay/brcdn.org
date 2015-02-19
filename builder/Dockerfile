@@ -16,6 +16,6 @@ ENV PATH /usr/local/node/bin:$PATH
 COPY ./ /src
 
 # Install app dependencies
-RUN cd /src; npm install
+# RUN cd /src && npm install
 
 entrypoint ["node", "/src/index.js"]
