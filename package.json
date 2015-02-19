@@ -1,7 +1,7 @@
 {
   "name": "brcdn.org",
   "host": "www.brcdn.org",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Browserify CDN",
   "private": true,
   "keywords": [],
