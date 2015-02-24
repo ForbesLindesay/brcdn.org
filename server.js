@@ -291,65 +291,73 @@ var request = require('then-request');
 var ms = require('ms');
 app.get('/status', function (req, res, next) {
   var fail = false;
-  var base = 'http://' + req.headers.host;
-  var urls = [
-    '/',
-    '/throat/2.0.2/index.js?uglify=true',
-    '/uglify-js/2.2.5?transform=uglify-to-browserify',
-    '/throat/2.0.2?uglify[output][beautify]=true',
-    '/promise/6.1.0/polyfill-done.js?raw=true',
-    '/?module=jade&version=latest',
-    '/jade/%5E1.0.0?standalone=jade',
-    '/?module=throat',
-    '/?module=uglify-js',
-    '/?module=promise',
-    '/?module=jade',
-    '/?module=then-request',
-    '/?module=request',
-    '/?module=lodash',
-    '/?module=underscore',
-    '/?module=less'
-  ].map(function (url) {
-    return base + url;
-  });
-  urls = urls.reduce(function (acc, url) {
-    return acc.then(function (acc) {
-      var start = Date.now();
-      function get(url) {
-        return request('GET', url, {
-          followRedirects: false,
-          headers: {'no-stats': 'true'}
-        }).then(function (res) {
-          if ([301, 302, 303, 307, 308].indexOf(res.statusCode) !== -1) {
-            return get(require('url').resolve(url, res.headers['location']));
-          } else {
-            return res;
-          }
-        });
-      }
-      return get(url).then(function (res) {
-        var color = 'black';
-        if (res.statusCode !== 200) {
-          color = 'red';
-          fail = true;
-        }
-        var duration = Date.now() - start;
-        var durationColor = 'black';
-        if (duration > 1000) {
-          durationColor = 'orange';
-        }
-        if (duration > 30000) {
-          durationColor = 'red';
-        }
-        return acc +
-          '<li><strong>' + url +
-          '</strong> <span style="color: ' + color +'">' +
-          res.statusCode + '</span> <i style="color: ' + durationColor + '">(' + ms(duration) +
-          ')</i></li>';
-      });
+  stats.topTen().then(function (ten) {
+    var base = 'http://' + req.headers.host;
+    var urls = [
+      '/',
+      '/throat/2.0.2/index.js?uglify=true',
+      '/uglify-js/2.2.5?transform=uglify-to-browserify',
+      '/throat/2.0.2?uglify[output][beautify]=true',
+      '/promise/6.1.0/polyfill-done.js?raw=true',
+      '/?module=jade&version=latest',
+      '/jade/%5E1.0.0?standalone=jade',
+      '/?module=throat',
+      '/?module=uglify-js',
+      '/?module=promise',
+      '/?module=jade',
+      '/?module=then-request',
+      '/?module=request',
+      '/?module=lodash',
+      '/?module=underscore',
+      '/?module=less',
+      '/?module=react-canvas',
+      '/?module=react',
+      '/?module=kefir'
+    ].concat(ten.map(function (item) {
+      return '/?module=' + item.name;
+    })).map(function (url) {
+      return base + url;
+    }).filter(function (item, index, all) {
+      return all.indexOf(item) === index;
     });
-  }, Promise.resolve(''));
-  urls.done(function (results) {
+    return urls.reduce(function (acc, url) {
+      return acc.then(function (acc) {
+        var start = Date.now();
+        function get(url) {
+          return request('GET', url, {
+            followRedirects: false,
+            headers: {'no-stats': 'true'}
+          }).then(function (res) {
+            if ([301, 302, 303, 307, 308].indexOf(res.statusCode) !== -1) {
+              return get(require('url').resolve(url, res.headers['location']));
+            } else {
+              return res;
+            }
+          });
+        }
+        return get(url).then(function (res) {
+          var color = 'black';
+          if (res.statusCode !== 200) {
+            color = 'red';
+            fail = true;
+          }
+          var duration = Date.now() - start;
+          var durationColor = 'black';
+          if (duration > 1000) {
+            durationColor = 'orange';
+          }
+          if (duration > 30000) {
+            durationColor = 'red';
+          }
+          return acc +
+            '<li><strong>' + url +
+            '</strong> <span style="color: ' + color +'">' +
+            res.statusCode + '</span> <i style="color: ' + durationColor + '">(' + ms(duration) +
+            ')</i></li>';
+        });
+      });
+    }, Promise.resolve(''));
+  }).done(function (results) {
     res.writeHead(fail ? 500 : 200, {'Content-Type': 'text/html'});
     res.end('<ul>' + results + '</ul>');
   }, next);
