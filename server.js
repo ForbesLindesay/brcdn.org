@@ -309,7 +309,8 @@ app.get('/status', function (req, res, next) {
       '/?module=request',
       '/?module=lodash',
       '/?module=underscore',
-      '/?module=less',
+      // TODO: fix browserifying less
+      // '/?module=less',
       '/?module=react-canvas',
       '/?module=react',
       '/?module=kefir'
