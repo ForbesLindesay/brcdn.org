@@ -15,6 +15,7 @@ var getVersions = require('./lib/get-versions');
 var getVersion = require('./lib/get-version');
 var getReadme = require('./lib/get-readme');
 var bundle = cache.bundle;
+var bundleUnCached = require('./lib/bundle');
 
 var md = new MarkdownIt({
   html: true,
@@ -321,6 +322,12 @@ app.get('/status', function (req, res, next) {
     }).filter(function (item, index, all) {
       return all.indexOf(item) === index;
     });
+    var start = Date.now();
+    var uncached = bundleUnCached('/require-test/1.0.0?standalone=test&uglify=true').then(function () {
+      return {success: true, duration: Date.now() - start};
+    }, function (err) {
+      return {success: false, duration: Date.now() - start, err: err ? (err.message || err) : 'unknown'};
+    });
     return urls.reduce(function (acc, url) {
       return acc.then(function (acc) {
         var start = Date.now();
@@ -357,7 +364,26 @@ app.get('/status', function (req, res, next) {
             ')</i></li>';
         });
       });
-    }, Promise.resolve(''));
+    }, uncached.then(function (res) {
+      var color = 'black';
+      if (!res.success) {
+        color = 'red';
+        fail = true;
+      }
+      var durationColor = 'black';
+      if (res.duration > 1000) {
+        durationColor = 'orange';
+      }
+      if (res.duration > 30000) {
+        durationColor = 'red';
+      }
+      return (
+        '<li><strong>uncached request' +
+        '</strong> <span style="color: ' + color +'">' +
+        (res.success ? 'success' : res.err) + '</span> <i style="color: ' + durationColor + '">(' + ms(res.duration) +
+        ')</i></li>'
+      );
+    }));
   }).done(function (results) {
     res.writeHead(fail ? 500 : 200, {'Content-Type': 'text/html'});
     res.end('<ul>' + results + '</ul>');
