@@ -1,5 +1,7 @@
 # brcdn.org
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ForbesLindesay/brcdn.org.svg)](https://greenkeeper.io/)
+
 Browserify CDN
 
 [![Build Status](https://img.shields.io/travis/ForbesLindesay/brcdn.org/master.svg)](https://travis-ci.org/ForbesLindesay/brcdn.org)
